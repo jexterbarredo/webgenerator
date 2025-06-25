@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GWA Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Light Theme Variables (Default) */
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --primary-blue: #2563eb;
+            --primary-blue-hover: #1d4ed8;
+            --text-main: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --input-bg: #ffffff;
+            --result-bg: #eff6ff;
+            --result-border: #93c5fd;
+        }
+
+        /* Dark Theme Variables */
+        html.dark-theme {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #1e293b;
+            --result-bg: #1e293b;
+            --result-border: #3b82f6;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        header {
+            width: 100%;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary-blue);
+        }
+
+        .logo svg { width: 32px; height: 32px; }
+
+        nav a, nav button {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-left: 1.5rem;
+            transition: color 0.3s;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-family: 'Inter', sans-serif;
+        }
+
+        nav a:hover, nav button:hover { color: var(--primary-blue); }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .title-section h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin: 0;
+        }
+        
+        .title-section .gradient-text {
+            background-image: linear-gradient(to right, #2563eb, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .title-section p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 650px;
+            margin: 1rem auto 0;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+        
+        .grades-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .grades-grid-header {
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .subject-row {
+            display: contents; /* Makes the div act as a passthrough for the grid layout */
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s, color 0.3s;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        
+        .action-button {
+            padding: 0.75rem 1rem;
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .action-button:hover { background-color: var(--primary-blue-hover); }
+
+        .remove-btn {
+            background-color: #ef4444; /* red-500 */
+        }
+         .remove-btn:hover {
+            background-color: #dc2626; /* red-600 */
+        }
+        
+        #result-panel {
+            background-color: var(--result-bg);
+            border: 1px solid var(--result-border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+        #result-panel h3 {
+            margin-top: 0;
+            font-family: 'Montserrat', sans-serif;
+            color: var(--primary-blue);
+            font-size: 1.25rem;
+        }
+        #gwa-display {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0.5rem 0;
+        }
+        #gwa-verdict {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 2rem;
+            box-sizing: border-box;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008Zm0 3h.008v.008H8.25v-.008Zm0 3h.008v.008H8.25v-.008Zm3.75 0h.008v.008h-.008v-.008Zm0-3h.008v.008h-.008v-.008Zm0-3h.008v.008h-.008v-.008Zm0-3h.008v.008h-.008v-.008Zm0-3h.008v.008h-.008v-.008Zm-3 0h.008v.008H8.25v-.008Zm-3.75 0h.008v.008H4.5v-.008Zm0 3h.008v.008H4.5v-.008Zm0 3h.008v.008H4.5v-.008Zm1.5-9h.008v.008H6v-.008Zm0 3h.008v.008H6v-.008Zm0 3h.008v.008H6v-.008Zm0 3h.008v.008H6v-.008Zm6.75-3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm2.25-9h.008v.008h-.008V9Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm-3-9h.008v.008h-.008V9Zm0 3h.008v.008h-.008v-.008Z" />
+            </svg>
+            <span>GWA Calculator</span>
+        </div>
+        <nav>
+            <a href="Generator.html">DLP Generator</a>
+            <button id="theme-toggle">Toggle Theme</button>
+             <a href="gwa.html">GWA Calculator</a> <!-- Add this -->
+</nav>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="title-section">
+            <h1>Calculate Your <span class="gradient-text">GWA</span></h1>
+            <p>Enter your final grades and the corresponding units for each to calculate your General Weighted Average.</p>
+        </div>
+
+        <div class="card" id="gwa-generator">
+            <h2>Enter Your Grades</h2>
+
+            <div id="grades-container">
+                <div class="grades-grid">
+                    <div class="grades-grid-header">Final Grade</div>
+                    <div class="grades-grid-header">Units</div>
+                    <div class="grades-grid-header">Action</div>
+                </div>
+                <!-- Subject rows will be injected here by JavaScript -->
+            </div>
+
+            <button id="add-row-btn" class="action-button" style="margin-top: 1rem;">Add Row</button>
+            
+            <div id="result-panel" style="display: none;">
+                <h3>Your General Weighted Average is:</h3>
+                <div id="gwa-display">0.00</div>
+                <div id="gwa-verdict"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 DLP & GWA Tools. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // --- THEME TOGGLE LOGIC ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const docElement = document.documentElement;
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                docElement.classList.add('dark-theme');
+            } else {
+                docElement.classList.remove('dark-theme');
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = docElement.classList.contains('dark-theme');
+            const newTheme = isDark ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+            addRow(); // Start with one row
+        });
+
+        // --- GWA CALCULATOR LOGIC ---
+        const gradesContainer = document.getElementById('grades-container');
+        const addRowBtn = document.getElementById('add-row-btn');
+        const resultPanel = document.getElementById('result-panel');
+        const gwaDisplay = document.getElementById('gwa-display');
+        const gwaVerdict = document.getElementById('gwa-verdict');
+        
+        let rowCounter = 0;
+
+        function addRow() {
+            rowCounter++;
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'subject-row';
+            rowDiv.id = `row-${rowCounter}`;
+
+            rowDiv.innerHTML = `
+                <input type="number" placeholder="e.g., 92" class="grade" min="0" max="100" step="0.01" oninput="calculateGWA()">
+                <input type="number" placeholder="e.g., 3" class="units" min="0" step="0.1" oninput="calculateGWA()">
+                <button class="action-button remove-btn" onclick="removeRow(${rowCounter})">Remove</button>
+            `;
+            
+            gradesContainer.appendChild(rowDiv);
+        }
+
+        function removeRow(id) {
+            const rowToRemove = document.getElementById(`row-${id}`);
+            if (rowToRemove) {
+                rowToRemove.remove();
+                calculateGWA();
+            }
+        }
+        
+        addRowBtn.addEventListener('click', addRow);
+
+        function calculateGWA() {
+            const subjectRows = gradesContainer.getElementsByClassName('subject-row');
+            let totalGradePoints = 0;
+            let totalUnits = 0;
+            let isValidInput = false;
+
+            for (const row of subjectRows) {
+                const gradeInput = row.querySelector('.grade');
+                const unitsInput = row.querySelector('.units');
+                
+                const grade = parseFloat(gradeInput.value);
+                const units = parseFloat(unitsInput.value);
+
+                if (!isNaN(grade) && !isNaN(units) && grade > 0 && units > 0) {
+                    totalGradePoints += grade * units;
+                    totalUnits += units;
+                    isValidInput = true;
+                }
+            }
+
+            if (isValidInput && totalUnits > 0) {
+                const gwa = totalGradePoints / totalUnits;
+                gwaDisplay.textContent = gwa.toFixed(2);
+                
+                // Provide a verdict based on common university scales
+                if (gwa >= 98) gwaVerdict.textContent = "Outstanding! You're a top scholar.";
+                else if (gwa >= 95) gwaVerdict.textContent = "Excellent! President's Lister performance.";
+                else if (gwa >= 92) gwaVerdict.textContent = "Great work! Dean's Lister performance.";
+                else if (gwa >= 88) gwaVerdict.textContent = "Very good! Strong academic standing.";
+                else if (gwa >= 85) gwaVerdict.textContent = "Good job! Keep up the effort.";
+                else if (gwa >= 75) gwaVerdict.textContent = "You passed. Aim higher next time!";
+                else gwaVerdict.textContent = "Requires improvement.";
+
+                resultPanel.style.display = 'block';
+            } else {
+                resultPanel.style.display = 'none';
+                gwaDisplay.textContent = '0.00';
+                gwaVerdict.textContent = '';
+            }
+        }
+    </script>
+</body>
+</html>
