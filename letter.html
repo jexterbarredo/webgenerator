@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>A Letter for You</title>
+<style>
+  :root{
+    --cream:#FBF6EE;
+    --blush:#F4A6A0;
+    --rose:#E4716E;
+    --sage:#9FB8A6;
+    --leaf:#5F7E6C;
+    --mustard:#EFC75E;
+    --lavender:#C9B8E0;
+    --ink:#3E4A41;
+    --paper:#FFFFFF;
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--cream);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(244,166,160,0.18), transparent 40%),
+      radial-gradient(circle at 85% 75%, rgba(159,184,166,0.20), transparent 45%);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    color:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 32px 16px 60px;
+    /* Prevents horizontal scrolling on mobile caused by rotated elements */
+    overflow-x: hidden; 
+  }
+
+  /* Music Button */
+  .music-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--paper);
+    border: 2px solid var(--leaf);
+    color: var(--leaf);
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(62,74,65,0.15);
+  }
+
+  .music-btn:hover {
+    background: var(--leaf);
+    color: var(--paper);
+    transform: scale(1.1);
+  }
+
+  .music-btn.playing {
+    border-color: var(--rose);
+    color: var(--rose);
+  }
+
+  .music-btn.playing:hover {
+    background: var(--rose);
+    color: var(--paper);
+  }
+
+  .back{
+    align-self:flex-start;
+    text-decoration:none;
+    color: var(--leaf);
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight:600;
+    border: 1px solid var(--leaf);
+    padding: 8px 16px;
+    border-radius: 999px;
+    transition: background 0.2s ease, color 0.2s ease;
+    margin-bottom: 12px;
+  }
+  .back:hover{
+    background: var(--leaf);
+    color: var(--paper);
+  }
+
+  h1{
+    font-family: 'Snell Roundhand','Brush Script MT', cursive;
+    font-size: clamp(2.2rem, 8vw, 3.2rem);
+    color: var(--rose);
+    margin: 18px 0 4px;
+    font-weight:400;
+    text-align:center;
+  }
+
+  .subtitle{
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--leaf);
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight:600;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  /* Photo frame */
+  .frame{
+    background: var(--paper);
+    padding: 16px 16px 56px;
+    border-radius: 6px;
+    box-shadow: 0 18px 40px rgba(62,74,65,0.25), 0 0 0 1px rgba(0,0,0,0.04);
+    max-width: 360px;
+    width: 100%;
+    transform: rotate(-1.5deg);
+    position: relative;
+    margin-bottom: 36px;
+  }
+  .frame::before{
+    content:"";
+    position:absolute;
+    top: -14px; left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    width: 70px; height: 26px;
+    background: rgba(239,199,94,0.55);
+    border: 1px solid rgba(239,199,94,0.8);
+  }
+  .frame img{
+    display:block;
+    width:100%;
+    border-radius: 2px;
+    filter: saturate(1.05);
+  }
+  .frame .caption{
+    position:absolute;
+    bottom: 16px; left:0; right:0;
+    text-align:center;
+    font-family: 'Snell Roundhand','Brush Script MT', cursive;
+    font-size: 1.3rem;
+    color: var(--rose);
+  }
+
+  /* Letter card */
+  .letter{
+    background: var(--paper);
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(62,74,65,0.18);
+    max-width: 480px;
+    width: 100%;
+    padding: 36px 28px;
+    position: relative;
+    line-height: 1.85;
+    font-size: 1.08rem;
+  }
+
+  .letter::before{
+    content:"";
+    position:absolute;
+    top:0; left:24px; right:24px;
+    height: 4px;
+    background: repeating-linear-gradient(90deg, var(--lavender) 0 14px, transparent 14px 28px);
+    border-radius: 0 0 4px 4px;
+  }
+
+  .letter .salutation{
+    font-family: 'Snell Roundhand','Brush Script MT', cursive;
+    font-size: 1.7rem;
+    color: var(--rose);
+    margin-bottom: 14px;
+  }
+
+  .letter p{
+    margin: 0 0 16px;
+  }
+
+  .letter .signoff{
+    font-family: 'Snell Roundhand','Brush Script MT', cursive;
+    font-size: 1.6rem;
+    color: var(--rose);
+    text-align:right;
+    margin-top: 18px;
+  }
+
+  .heart-row{
+    text-align:center;
+    margin-top: 30px;
+    font-size: 1.4rem;
+    letter-spacing: 8px;
+    color: var(--rose);
+  }
+
+  footer{
+    margin-top: 36px;
+    font-size: 0.85rem;
+    color: var(--ink);
+    opacity:0.5;
+    text-align:center;
+    font-family: Helvetica, Arial, sans-serif;
+  }
+
+  /* --- Mobile Optimization Adjustments --- */
+  @media (max-width: 480px) {
+    body {
+      padding: 20px 12px 40px;
+    }
+    
+    .music-btn {
+      top: 12px;
+      right: 12px;
+      width: 40px;
+      height: 40px;
+      font-size: 1.1rem;
+    }
+
+    .frame {
+      padding: 12px 12px 48px; /* Slightly tighter frame on mobile */
+      margin-bottom: 28px;
+    }
+
+    .letter {
+      padding: 28px 20px; /* Give text more width on small screens */
+      font-size: 1rem;    /* Slightly smaller base font */
+      line-height: 1.7;
+    }
+
+    .letter .salutation {
+      font-size: 1.5rem;
+    }
+
+    .letter .signoff {
+      font-size: 1.4rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<audio id="bgMusic" loop src="music.mp3" autoplay></audio>
+
+<button class="music-btn" id="musicBtn" aria-label="Toggle Music" title="Play Music">🔈</button>
+
+<a class="back" href="bouquet.html">← Back to the bouquet</a>
+
+<h1>A Little Letter</h1>
+<div class="subtitle">two years, and counting</div>
+
+<div class="frame">
+  <img src="photo (1).jpg" alt="A photo of you, sitting quietly in the garden">
+  <div class="caption">my favorite person</div>
+</div>
+
+<div class="letter">
+  <div class="salutation">My dearest,</div>
+
+  <p>Two years ago, I didn't know that one quiet afternoon would turn into the start of something I'd never want to end. Since then, every ordinary day with you has somehow turned into a memory I want to keep.</p>
+
+  <p>I love the way you get lost in your own little world, the way you laugh at the things only you find funny, and the way you make even sitting on a bench under the trees feel like the most peaceful place in the world. You have this quiet way of making everything feel softer, calmer, better — just by being there.</p>
+
+  <p>These two years haven't been perfect, but they've been ours, and that's what makes them mean everything to me. Through the good days and the hard ones, you've stayed — and I don't think I'll ever stop being thankful for that.</p>
+
+  <p>So here's to us, to the two years behind us, and to every year still waiting for us. Thank you for loving me, for staying, and for being exactly who you are.</p>
+
+  <p>I love you. Today, and always.</p>
+
+  <div class="signoff">— yours, always Jexter</div>
+
+  <div class="heart-row">🌹 🌼 🌸 🌷 🌻</div>
+</div>
+
+<footer>made with care, two years in the making 🌿</footer>
+
+<script>
+  // Music Logic
+  const bgMusic = document.getElementById('bgMusic');
+  const musicBtn = document.getElementById('musicBtn');
+  let isPlaying = false;
+
+  function setPlayingState() {
+    isPlaying = true;
+    musicBtn.classList.add('playing');
+    musicBtn.innerHTML = '🔊';
+    musicBtn.title = "Pause Music";
+  }
+
+  // Mobile-optimized autoplay logic
+  window.addEventListener('DOMContentLoaded', () => {
+    const playPromise = bgMusic.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // Autoplay worked without interaction!
+        setPlayingState();
+      }).catch(error => {
+        // Autoplay blocked by mobile browser. Wait for a tap.
+        const startAudio = () => {
+          bgMusic.play().then(() => {
+            setPlayingState();
+          }).catch(e => console.log("Audio play failed:", e));
+          
+          // Remove listeners after first tap so it doesn't keep triggering
+          document.removeEventListener('click', startAudio);
+          document.removeEventListener('touchstart', startAudio);
+        };
+
+        // Listen for both clicks and mobile screen touches
+        document.addEventListener('click', startAudio, { once: true });
+        document.addEventListener('touchstart', startAudio, { once: true });
+      });
+    }
+  });
+
+  // Manual toggle via the button
+  musicBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevents the body click from firing if they click the button directly
+    if (isPlaying) {
+      bgMusic.pause();
+      musicBtn.classList.remove('playing');
+      musicBtn.innerHTML = '🔈';
+      musicBtn.title = "Play Music";
+    } else {
+      bgMusic.play();
+      setPlayingState();
+    }
+    isPlaying = !isPlaying;
+  });
+</script>
+
+</body>
+</html>

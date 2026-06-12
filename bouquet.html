@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>A Bouquet of Little Things</title>
+<style>
+  :root{
+    --cream:#FBF6EE;
+    --blush:#F4A6A0;
+    --rose:#E4716E;
+    --sage:#9FB8A6;
+    --leaf:#5F7E6C;
+    --mustard:#EFC75E;
+    --lavender:#C9B8E0;
+    --ink:#3E4A41;
+    --paper:#FFFFFF;
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--cream);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(244,166,160,0.18), transparent 40%),
+      radial-gradient(circle at 85% 75%, rgba(159,184,166,0.20), transparent 45%);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    color:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 32px 16px 60px;
+    overflow-x:hidden;
+  }
+
+  /* Music Button */
+  .music-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--paper);
+    border: 2px solid var(--leaf);
+    color: var(--leaf);
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(62,74,65,0.15);
+  }
+
+  .music-btn:hover {
+    background: var(--leaf);
+    color: var(--paper);
+    transform: scale(1.1);
+  }
+
+  .music-btn.playing {
+    border-color: var(--rose);
+    color: var(--rose);
+  }
+
+  .music-btn.playing:hover {
+    background: var(--rose);
+    color: var(--paper);
+  }
+
+  header{
+    text-align:center;
+    margin-bottom: 8px;
+    margin-top: 20px;
+  }
+
+  h1{
+    font-family: 'Snell Roundhand','Brush Script MT', cursive;
+    font-size: clamp(2.2rem, 8vw, 3.2rem);
+    color: var(--rose);
+    margin: 0;
+    font-weight:400;
+    letter-spacing: 1px;
+  }
+
+  .subtitle{
+    font-size: 0.95rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--leaf);
+    margin-top: 6px;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight:600;
+  }
+
+  .hint{
+    margin-top: 14px;
+    font-size: 0.95rem;
+    color: var(--ink);
+    opacity:0.65;
+    font-style: italic;
+  }
+
+  .stage{
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    margin-top: 18px;
+    aspect-ratio: 3 / 4;
+  }
+
+  .stage svg{
+    width:100%;
+    height:100%;
+    display:block;
+    overflow: visible;
+  }
+
+  .bloom{
+    cursor:pointer;
+    transform-origin: center;
+    transform-box: fill-box;
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), filter 0.25s ease;
+  }
+
+  .bloom:hover, .bloom:focus-visible{
+    transform: scale(1.08) rotate(5deg);
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.20));
+    outline:none;
+  }
+
+  .bloom.opened{
+    filter: drop-shadow(0 0 0 transparent);
+  }
+
+  @keyframes sway{
+    0%,100%{ transform: rotate(0deg); }
+    50%{ transform: rotate(1.5deg); }
+  }
+  .sway{
+    animation: sway 6s ease-in-out infinite;
+    transform-origin: 50% 100%;
+  }
+  .sway-rev{ animation-direction: reverse; animation-delay: -2s; }
+
+  @media (prefers-reduced-motion: reduce){
+    .sway{ animation: none; }
+    .bloom{ transition: none; }
+  }
+
+  .overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(62,74,65,0.45);
+    backdrop-filter: blur(2px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.25s ease;
+    z-index: 50;
+  }
+  .overlay.show{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .card{
+    background: var(--paper);
+    border-radius: 22px;
+    padding: 32px 28px;
+    max-width: 360px;
+    width:100%;
+    text-align:center;
+    box-shadow: 0 18px 40px rgba(62,74,65,0.25);
+    transform: translateY(18px) scale(0.96);
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    position:relative;
+  }
+  .overlay.show .card{
+    transform: translateY(0) scale(1);
+  }
+
+  .card .icon{
+    font-size: 2.2rem;
+    display:block;
+    margin-bottom: 10px;
+  }
+
+  .card .flower-name{
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--leaf);
+    margin-bottom: 10px;
+  }
+
+  .card .message{
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  .card .close{
+    margin-top: 22px;
+    border: none;
+    background: var(--rose);
+    color: var(--paper);
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight:600;
+    letter-spacing:1px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    padding: 10px 26px;
+    border-radius: 999px;
+    cursor:pointer;
+    transition: background 0.2s ease;
+  }
+  .card .close:hover{ background: var(--leaf); }
+
+  footer{
+    margin-top: 40px;
+    font-size: 0.85rem;
+    color: var(--ink);
+    opacity:0.5;
+    text-align:center;
+    font-family: Helvetica, Arial, sans-serif;
+  }
+
+  .progress{
+    margin-top: 28px;
+    display:flex;
+    gap: 8px;
+  }
+  .dot{
+    width: 9px; height:9px;
+    border-radius:50%;
+    background: rgba(95,126,108,0.25);
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .dot.filled{
+    background: var(--rose);
+    transform: scale(1.2);
+  }
+
+  .letter-btn{
+    margin-top: 28px;
+    display:inline-block;
+    text-decoration:none;
+    background: var(--rose);
+    color: var(--paper);
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight:600;
+    letter-spacing:1px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    padding: 14px 32px;
+    border-radius: 999px;
+    box-shadow: 0 8px 18px rgba(228,113,110,0.35);
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .letter-btn:hover{
+    background: var(--leaf);
+    transform: translateY(-2px);
+  }
+</style>
+</head>
+<body>
+
+<!-- Audio Element (autoplay added) -->
+<audio id="bgMusic" loop src="music.mp3" autoplay></audio>
+
+<!-- Music Toggle Button -->
+<button class="music-btn" id="musicBtn" aria-label="Toggle Music" title="Play Music">🔈</button>
+
+<header>
+  <h1>For You</h1>
+  <div class="subtitle">a little bouquet of reasons</div>
+  <div class="hint">tap a flower to open it 🌸</div>
+</header>
+
+<div class="stage">
+  <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- ===== STEMS / WRAP ===== -->
+    <g>
+      <!-- wrap paper -->
+      <path d="M115 270 L185 270 L200 380 L100 380 Z" fill="var(--cream)" stroke="var(--leaf)" stroke-width="2" opacity="0.9"/>
+      <line x1="120" y1="285" x2="180" y2="285" stroke="var(--leaf)" stroke-width="2" opacity="0.6"/>
+      <line x1="118" y1="305" x2="182" y2="305" stroke="var(--leaf)" stroke-width="2" opacity="0.4"/>
+      <!-- twine bow -->
+      <path d="M150 270 C140 285 135 295 150 300 C165 295 160 285 150 270 Z" fill="var(--mustard)" opacity="0.85"/>
+      <line x1="150" y1="270" x2="150" y2="300" stroke="var(--rose)" stroke-width="2"/>
+      
+      <!-- Fixed position for "i love you" text and heart -->
+      <text x="150" y="325" font-family="'Snell Roundhand','Brush Script MT', cursive" font-size="16" fill="var(--rose)" text-anchor="middle">i love you</text>
+      <text x="150" y="345" font-size="14" text-anchor="middle">💜</text>
+    </g>
+
+    <!-- Background leaves -->
+    <g opacity="0.9">
+      <path d="M150 270 C120 220 90 180 60 150 C90 175 125 210 150 270 Z" fill="var(--sage)"/>
+      <path d="M150 270 C180 210 210 170 245 145 C210 175 180 215 150 270 Z" fill="var(--leaf)" opacity="0.85"/>
+      <path d="M150 270 C140 200 130 150 120 100 C140 145 155 200 150 270 Z" fill="var(--sage)" opacity="0.7"/>
+    </g>
+
+    <!-- ============ FLOWERS ============ -->
+
+    <!-- Stems -->
+    <g stroke="var(--leaf)" stroke-width="3" fill="none" opacity="0.7">
+      <path d="M150 270 C140 230 110 190 95 150"/>
+      <path d="M150 270 C160 220 175 180 195 140"/>
+      <path d="M150 270 C150 210 150 160 150 90"/>
+      <path d="M150 270 C130 230 120 195 110 175"/>
+      <path d="M150 270 C175 235 195 205 215 185"/>
+    </g>
+
+    <!-- 1. Big rose -->
+    <g class="bloom sway" data-flower="Rose" data-msg="You are my favorite hello and my hardest goodbye, every single day." tabindex="0" role="button" aria-label="Open message from the Rose">
+      <circle cx="95" cy="150" r="34" fill="var(--rose)"/>
+      <circle cx="95" cy="150" r="22" fill="var(--blush)"/>
+      <circle cx="95" cy="150" r="10" fill="var(--mustard)"/>
+      <path d="M95 150 C70 135 60 115 75 100 C90 110 95 130 95 150 Z" fill="var(--rose)" opacity="0.85"/>
+      <path d="M95 150 C120 135 130 115 115 100 C100 110 95 130 95 150 Z" fill="var(--rose)" opacity="0.85"/>
+    </g>
+
+    <!-- 2. Daisy cluster -->
+    <g class="bloom sway sway-rev" data-flower="Daisy" data-msg="Little moments with you somehow become my favorite memories." tabindex="0" role="button" aria-label="Open message from the Daisy">
+      <g transform="translate(150,90)">
+        <g fill="var(--paper)" stroke="var(--lavender)" stroke-width="1.5">
+          <ellipse cx="0" cy="-16" rx="6" ry="14"/>
+          <ellipse cx="0" cy="16" rx="6" ry="14"/>
+          <ellipse cx="-16" cy="0" rx="14" ry="6"/>
+          <ellipse cx="16" cy="0" rx="14" ry="6"/>
+          <ellipse cx="-11" cy="-11" rx="6" ry="14" transform="rotate(45 -11 -11)"/>
+          <ellipse cx="11" cy="11" rx="6" ry="14" transform="rotate(45 11 11)"/>
+          <ellipse cx="-11" cy="11" rx="6" ry="14" transform="rotate(-45 -11 11)"/>
+          <ellipse cx="11" cy="-11" rx="6" ry="14" transform="rotate(-45 11 -11)"/>
+        </g>
+        <circle cx="0" cy="0" r="9" fill="var(--mustard)"/>
+      </g>
+      <circle cx="172" cy="105" r="9" fill="var(--blush)"/>
+    </g>
+
+    <!-- 3. Aster -->
+    <g class="bloom sway" data-flower="Aster" data-msg="Whatever season life brings, I want you with me through all of them." tabindex="0" role="button" aria-label="Open message from the Aster">
+      <g transform="translate(195,140)">
+        <g fill="var(--lavender)">
+          <ellipse cx="0" cy="-13" rx="5" ry="13"/>
+          <ellipse cx="0" cy="13" rx="5" ry="13"/>
+          <ellipse cx="-13" cy="0" rx="13" ry="5"/>
+          <ellipse cx="13" cy="0" rx="13" ry="5"/>
+          <ellipse cx="-9" cy="-9" rx="5" ry="13" transform="rotate(45 -9 -9)"/>
+          <ellipse cx="9" cy="9" rx="5" ry="13" transform="rotate(45 9 9)"/>
+          <ellipse cx="-9" cy="9" rx="5" ry="13" transform="rotate(-45 -9 9)"/>
+          <ellipse cx="9" cy="-9" rx="5" ry="13" transform="rotate(-45 9 -9)"/>
+        </g>
+        <circle cx="0" cy="0" r="7" fill="var(--mustard)"/>
+      </g>
+    </g>
+
+    <!-- 4. Tulip -->
+    <g class="bloom sway sway-rev" data-flower="Tulip" data-msg="You make ordinary days feel like they're worth remembering." tabindex="0" role="button" aria-label="Open message from the Tulip">
+      <path d="M110 175 C95 175 90 160 95 145 C100 158 110 165 110 175 Z" fill="var(--blush)"/>
+      <path d="M110 175 C125 175 130 160 125 145 C120 158 110 165 110 175 Z" fill="var(--rose)" opacity="0.9"/>
+      <path d="M110 175 C105 168 110 158 110 150 C115 158 115 168 110 175 Z" fill="var(--mustard)" opacity="0.9"/>
+    </g>
+
+    <!-- 5. Marigold -->
+    <g class="bloom sway" data-flower="Marigold" data-msg="Thank you for being the warm, golden part of my everyday." tabindex="0" role="button" aria-label="Open message from the Marigold">
+      <g transform="translate(215,185)">
+        <circle r="16" fill="var(--mustard)"/>
+        <circle r="9" fill="var(--rose)" opacity="0.8"/>
+        <g fill="var(--mustard)" opacity="0.9">
+          <circle cx="-18" cy="-6" r="6"/>
+          <circle cx="18" cy="-6" r="6"/>
+          <circle cx="-18" cy="6" r="6"/>
+          <circle cx="18" cy="6" r="6"/>
+          <circle cx="0" cy="-19" r="6"/>
+          <circle cx="0" cy="19" r="6"/>
+        </g>
+      </g>
+    </g>
+
+  </svg>
+</div>
+
+<div class="progress" id="progress">
+  <span class="dot" data-i="0"></span>
+  <span class="dot" data-i="1"></span>
+  <span class="dot" data-i="2"></span>
+  <span class="dot" data-i="3"></span>
+  <span class="dot" data-i="4"></span>
+</div>
+
+<a href="letter.html" target="_blank" rel="noopener" class="letter-btn">Open the letter 💌</a>
+
+<footer>made with care, one petal at a time 🌿</footer>
+
+<!-- Message overlay -->
+<div class="overlay" id="overlay">
+  <div class="card">
+    <span class="icon" id="cardIcon">🌸</span>
+    <div class="flower-name" id="cardFlower">Rose</div>
+    <div class="message" id="cardMessage">Message goes here.</div>
+    <button class="close" id="closeBtn">Close</button>
+  </div>
+</div>
+
+<script>
+  // Music Logic
+  const bgMusic = document.getElementById('bgMusic');
+  const musicBtn = document.getElementById('musicBtn');
+  let isPlaying = false;
+
+  function setPlayingState() {
+    isPlaying = true;
+    musicBtn.classList.add('playing');
+    musicBtn.innerHTML = '🔊';
+    musicBtn.title = "Pause Music";
+  }
+
+  // Attempt to autoplay on load
+  window.addEventListener('DOMContentLoaded', () => {
+    const playPromise = bgMusic.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // Autoplay worked! (Unlikely on most browsers unless they've interacted with your site before)
+        setPlayingState();
+      }).catch(error => {
+        // Autoplay was blocked. Wait for the user to interact with the page.
+        document.body.addEventListener('click', function startAudio() {
+          bgMusic.play();
+          setPlayingState();
+          // Remove the listener so it only triggers once
+          document.body.removeEventListener('click', startAudio);
+        }, { once: true });
+      });
+    }
+  });
+
+  // Manual toggle via the button
+  musicBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevents the body click from firing if they click the button directly
+    if (isPlaying) {
+      bgMusic.pause();
+      musicBtn.classList.remove('playing');
+      musicBtn.innerHTML = '🔈';
+      musicBtn.title = "Play Music";
+    } else {
+      bgMusic.play();
+      setPlayingState();
+    }
+    isPlaying = !isPlaying;
+  });
+
+  // Flower Interaction Logic
+  const blooms = Array.from(document.querySelectorAll('.bloom'));
+  const overlay = document.getElementById('overlay');
+  const cardFlower = document.getElementById('cardFlower');
+  const cardMessage = document.getElementById('cardMessage');
+  const cardIcon = document.getElementById('cardIcon');
+  const closeBtn = document.getElementById('closeBtn');
+  const dots = Array.from(document.querySelectorAll('.dot'));
+
+  const icons = ['🌹','🌼','🌸','🌷','🌻'];
+
+  blooms.forEach((b, i) => {
+    const open = () => {
+      cardFlower.textContent = b.dataset.flower;
+      cardMessage.textContent = b.dataset.msg;
+      cardIcon.textContent = icons[i % icons.length];
+      overlay.classList.add('show');
+      if(!b.classList.contains('opened')){
+        b.classList.add('opened');
+        dots[i] && dots[i].classList.add('filled');
+      }
+    };
+    b.addEventListener('click', open);
+    b.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); }
+    });
+  });
+
+  const closeCard = () => overlay.classList.remove('show');
+  closeBtn.addEventListener('click', closeCard);
+  overlay.addEventListener('click', (e) => {
+    if(e.target === overlay) closeCard();
+  });
+</script>
+
+</body>
+</html>
